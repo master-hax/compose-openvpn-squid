@@ -43,8 +43,6 @@ services:
       - openvpn-client-config-volume:/vpn
     environment:
       FIREWALL: ""
-      VPNPORT: "4001;udp"   # port forwarding for ipfs-node
-      VPNPORT_2: "4001;tcp" # update /ipfs/config in the ipfs container if these are changed
       OTHER_ARGS: "--mute-replay-warnings" # optional
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=0 # for raspberry pi compatibility?
