@@ -29,27 +29,33 @@ services:
       - isolated_vpn_network
 
   vpn-sidecar:
-    image: lscr.io/linuxserver/wireguard
+    image: dperson/openvpn-client
     restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    volumes:
-      - /lib/modules:/lib/modules
-      - wgclient-data-volume:/config
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-      - net.ipv6.conf.all.disable_ipv6=0 # for raspberry pi compatibility?
     networks:
       - isolated_vpn_network
+    cap_add:
+      - NET_ADMIN
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - openvpn-client-config-volume:/vpn
+    environment:
+      FIREWALL: ""
+      VPNPORT: "4001;udp"   # port forwarding for ipfs-node
+      VPNPORT_2: "4001;tcp" # update /ipfs/config in the ipfs container if these are changed
+      OTHER_ARGS: "--mute-replay-warnings" # optional
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0 # for raspberry pi compatibility?
 
 volumes:
-  wgclient-data-volume: # writeable location of wg0.conf
+  openvpn-client-config-volume: # read-only location of *.ovpn
     driver: local
     driver_opts:
         o: bind
         type: none
-        device: "$PWD/wireguard/"
+        device: "$PWD/openvpn/"
 
 networks:
   default:
